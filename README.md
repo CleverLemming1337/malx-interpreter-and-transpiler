@@ -6,3 +6,9 @@ The following commands are already included:
 - out
 - in
 - sadr
+- add
+- sub
+- sfig
+- jif
+
+For more info see the wiki on GitHub.

@@ -106,6 +106,7 @@ def sub(args):
     memory[adrr] = memory[adr1]-memory[adr2]
 
 def sfig(args):
+    global flag
     if not (isAdr(args[0]) and isAdr(args[1])):
         raise MalxSyntaxError(None, "Arguments of sub must be memory addresses")
     
@@ -121,7 +122,7 @@ def jif(args):
     if not isLine(args[0]):
         raise MalxSyntaxError(None, "First argument of jif must be valid line")
     if flag:
-        return int(args[0])
+        return int(args[0][1:])
     else:
         return None
 def parseLine(line):
@@ -145,6 +146,7 @@ def parseLine(line):
             raise MalxCommandError(None, args[0])
     except MalxSyntaxError:
         raise
+    print(flag)
     return result
 
 def parseFile(fileName):
