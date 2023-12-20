@@ -79,10 +79,10 @@ def add(args):
         raise MalxSyntaxError(None, "Arguments of add must be numbers")
     
     adr1 = int(args[0][1:])
-    adr2 = int(args[0][1:])
-    adrr = int(args[0][1:])
+    adr2 = int(args[1][1:])
+    adrr = int(args[2][1:])
 
-    memory[adrr] = adr1+adr2
+    memory[adrr] = memory[adr1]+memory[adr2]
 def parseLine(line):
     try:
         args = line.split()
