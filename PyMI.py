@@ -2,6 +2,7 @@ import sys
 
 memorySize = 32
 memory = [0 for _ in range(memorySize)]
+flag = False
 
 def isAdr(arg):
     if arg[0] != "#":
@@ -16,7 +17,11 @@ def isNumber(arg):
         return True
     return False
 
-
+def isLine(arg):
+    if arg[0] == "$" and arg[1:].isdecimal() and int(arg[1:]) <= fileLength and int(arg[1:]) > 0:
+        return True
+    return False
+    
 class MalxSyntaxError(Exception):
     def __init__(self, line, text):
         self.line = line
@@ -30,6 +35,13 @@ class MalxCommandError(Exception):
         self.command = command
     def __str__(self):
         return f"Line {self.line}: Unknown command: {self.command}"
+
+class MalxParsingError(Exception):
+    def __init__(self, line, text):
+        self.line = line
+        self.text = text
+    def __str__(self):
+        return f"Line {self.line}: Error while parsing: {self.text}"
 
 def sadr(args):
     if not isAdr(args[0]):
@@ -54,7 +66,6 @@ def out(args):
     
     for i in range(adrf, adrt+1):
         print(chr(memory[i]), end="")
-    print()
 
 def _in(args):
     if not isAdr(args[0]):
@@ -76,39 +87,85 @@ def _in(args):
 
 def add(args):
     if not (isAdr(args[0]) and isAdr(args[1]) and isAdr(args[2])):
-        raise MalxSyntaxError(None, "Arguments of add must be numbers")
+        raise MalxSyntaxError(None, "Arguments of add must be memory addresses")
     
     adr1 = int(args[0][1:])
     adr2 = int(args[1][1:])
     adrr = int(args[2][1:])
 
     memory[adrr] = memory[adr1]+memory[adr2]
+
+def sub(args):
+    if not (isAdr(args[0]) and isAdr(args[1]) and isAdr(args[2])):
+        raise MalxSyntaxError(None, "Arguments of sub must be memory addresses")
+    
+    adr1 = int(args[0][1:])
+    adr2 = int(args[1][1:])
+    adrr = int(args[2][1:])
+
+    memory[adrr] = memory[adr1]-memory[adr2]
+
+def sfig(args):
+    if not (isAdr(args[0]) and isAdr(args[1])):
+        raise MalxSyntaxError(None, "Arguments of sub must be memory addresses")
+    
+    adr1 = int(args[0][1:])
+    adr2 = int(args[1][1:])
+
+    if adr1 > adr2:
+        flag = True
+    else:
+        flag = False
+
+def jif(args):
+    if not isLine(args[0]):
+        raise MalxSyntaxError(None, "First argument of jif must be valid line")
+    if flag:
+        return int(args[0])
+    else:
+        return None
 def parseLine(line):
     try:
         args = line.split()
         if args[0] == "sadr":
-            sadr(args[1:])
+            result = sadr(args[1:])
         elif args[0] == "out":
-            out(args[1:])
+            result = out(args[1:])
         elif args[0] == "in":
-            _in(args[1:])
+            result = _in(args[1:])
         elif args[0] == "add":
-            add(args[1:])
+            result = add(args[1:])
+        elif args[0] == "sub":
+            result = sub(args[1:])
+        elif args[0] == "sfig":
+            result = sfig(args[1:])
+        elif args[0] == "jif":
+            result = jif(args[1:])
         else:
             raise MalxCommandError(None, args[0])
     except MalxSyntaxError:
         raise
+    return result
 
 def parseFile(fileName):
     with open(fileName, "r") as f:
         index = 0
-        for i in f.readlines():
-            index += 1
+        lines = f.readlines()
+
+        global fileLength
+        fileLength = len(lines)
+        while True:
             try:
-                parseLine(i)
+                result = parseLine(lines[index])
+                if result != None:
+                    index = result
+                if index+1 == len(lines):
+                    break
             except (MalxSyntaxError, MalxCommandError) as err:
-                err.line = index
+                err.line = index+1
                 raise
+            index += 1
 
 print(sys.argv[1])
 parseFile(sys.argv[1])
+
