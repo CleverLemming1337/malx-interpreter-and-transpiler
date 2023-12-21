@@ -70,7 +70,7 @@ def out(args):
     adrt = int(args[1][1:])
     
     for i in range(adrf, adrt+1):
-        print(chr(memory[i]), end="")
+        print(chr(memory[i]), end="", flush=True)
 
 def _in(args):
     if not isAdr(args[0]):
@@ -113,12 +113,12 @@ def sub(args):
 def sfig(args):
     global flag
     if not (isAdr(args[0]) and isAdr(args[1])):
-        raise MalxSyntaxError(None, "Arguments of sub must be memory addresses")
+        raise MalxSyntaxError(None, "Arguments of sfig must be memory addresses")
     
     adr1 = int(args[0][1:])
     adr2 = int(args[1][1:])
-
-    if adr1 > adr2:
+    
+    if memory[adr1] > memory[adr2]:
         flag = True
     else:
         flag = False
@@ -127,7 +127,7 @@ def jif(args):
     if not isLine(args[0]):
         raise MalxSyntaxError(None, "First argument of jif must be valid line")
     if flag:
-        return int(args[0][1:])
+        return int(args[0][1:])-1 # There's an offset. Provisional fix
     else:
         return None
 
@@ -143,6 +143,7 @@ def ext(args):
             exit(int(args[1]))
         elif cmd == 1:
             time.sleep(int(args[1])/1000)
+        
     except ValueError:
         raise MalxCommandError(None, "Invalid external command arg")
     except IndexError:
@@ -173,6 +174,7 @@ def parseLine(line):
             raise MalxCommandError(None, args[0])
     except MalxSyntaxError:
         raise
+
     return result
 
 def parseFile(fileName):
