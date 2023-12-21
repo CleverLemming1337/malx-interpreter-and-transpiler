@@ -1,4 +1,5 @@
 import sys
+import time
 
 memorySize = 32
 memory = [0 for _ in range(memorySize)]
@@ -21,7 +22,11 @@ def isLine(arg):
     if arg[0] == "$" and arg[1:].isdecimal() and int(arg[1:]) <= fileLength and int(arg[1:]) > 0:
         return True
     return False
-    
+
+def isExtCmd(arg):
+    if arg[0] == "/" and arg[1:].isdecimal():
+        return True
+    return False
 class MalxSyntaxError(Exception):
     def __init__(self, line, text):
         self.line = line
@@ -125,8 +130,28 @@ def jif(args):
         return int(args[0][1:])
     else:
         return None
+
+def ext(args):
+    if not isExtCmd(args[0]):
+        raise MalxSyntaxError(None, "Argument of ext must be external command")
+    
+    cmd = int(args[0][1:])
+
+    try:
+        if cmd == 0:
+            print()
+            exit(int(args[1]))
+        elif cmd == 1:
+            time.sleep(int(args[1])/1000)
+    except ValueError:
+        raise MalxCommandError(None, "Invalid external command arg")
+    except IndexError:
+        raise MalxSyntaxError(None, "Missing argument for ext")
+    
 def parseLine(line):
     try:
+        if line.startswith("//"):
+            return
         args = line.split()
         if args[0] == "sadr":
             result = sadr(args[1:])
@@ -142,11 +167,12 @@ def parseLine(line):
             result = sfig(args[1:])
         elif args[0] == "jif":
             result = jif(args[1:])
+        elif args[0] == "ext":
+            result = ext(args[1:])
         else:
             raise MalxCommandError(None, args[0])
     except MalxSyntaxError:
         raise
-    print(flag)
     return result
 
 def parseFile(fileName):
@@ -158,6 +184,9 @@ def parseFile(fileName):
         fileLength = len(lines)
         while True:
             try:
+                lines[index] = lines[index].strip()
+                if lines[index].endswith(";"):
+                    lines[index] = lines[index][:-1]
                 result = parseLine(lines[index])
                 if result != None:
                     index = result
@@ -170,4 +199,4 @@ def parseFile(fileName):
 
 print(sys.argv[1])
 parseFile(sys.argv[1])
-
+print()
