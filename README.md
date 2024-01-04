@@ -1,4 +1,8 @@
 # malx-interpreter-and-transpiler
+
+> [!WARNING]
+> Because malx is discontinued, this repository will not be updated anymore.
+
 Some interpreters and transpilers for HeyTomCat‘s malx programming language (https://github.com/HeyTomCat/ProgramLangs/tree/main/langs/malx).
 
 ## Interpreter with Python (PyMI)
